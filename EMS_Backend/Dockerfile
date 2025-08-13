@@ -7,6 +7,6 @@ RUN mvn clean install -DskipTests
 # Stage 2: Create the final, smaller image with just the built application
 FROM openjdk:17-jdk-slim
 WORKDIR /app
-COPY --from=build /app/target/demo-0.0.1-SNAPSHOT.jar app.jar
+COPY --from=build /app/target/*.jar app.jar
 EXPOSE 9090
 ENTRYPOINT ["java","-jar","app.jar"]
