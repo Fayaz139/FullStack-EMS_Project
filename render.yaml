@@ -1,0 +1,15 @@
+services:
+  - type: web
+    name: ems-backend
+    env: java
+    rootDir: backend
+    plan: free
+    buildCommand: "./mvnw clean install"
+    startCommand: "java -jar target/demo-0.0.1-SNAPSHOT.jar"
+    envVars:
+      - key: JAVA_VERSION
+        value: 17
+      - key: DB_URL
+        fromDatabase:
+          name: ems-database # <-- IMPORTANT: Change this if you named your DB differently
+          property: connectionString
