@@ -1,0 +1,504 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EMS Dashboard</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #1a1a2e;
+            --primary-color: #16213e;
+            --secondary-color: #0f3460;
+            --accent-color: #e94560;
+            --font-color: #e0e0e0;
+            --card-bg: #1e1e3f;
+            --success-color: #4CAF50;
+            --error-color: #F44336;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--font-color);
+            margin: 0;
+            padding: 2rem;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            min-height: 100vh;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1200px;
+        }
+
+        /* Header */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            padding: 1rem 2rem;
+            background: var(--primary-color);
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+
+        .header h1 {
+            margin: 0;
+            font-size: 1.8rem;
+            font-weight: 700;
+        }
+
+        /* Buttons */
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background-color: var(--accent-color);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(233, 69, 96, 0.4);
+        }
+
+        /* Employee Section */
+        #employee-section {
+            display: none; /* Initially hidden */
+        }
+
+        .toolbar {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 1.5rem;
+        }
+
+        .search-bar {
+            position: relative;
+            width: 300px;
+        }
+
+        .search-bar input {
+            width: 100%;
+            padding: 12px 12px 12px 40px;
+            border-radius: 8px;
+            border: 2px solid var(--secondary-color);
+            background-color: var(--primary-color);
+            color: var(--font-color);
+            font-size: 1rem;
+        }
+        
+        .search-bar svg {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #888;
+        }
+
+        /* Employee Cards Grid */
+        .employee-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .employee-card {
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+            border: 1px solid var(--secondary-color);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .employee-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 1rem;
+        }
+
+        .card-header h3 {
+            margin: 0;
+            color: var(--font-color);
+        }
+        .card-header .emp-id {
+            background: var(--secondary-color);
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+        
+        .card-body p {
+            margin: 0.5rem 0;
+            color: #b0b0b0;
+        }
+        
+        .card-footer {
+            margin-top: auto;
+            padding-top: 1rem;
+            border-top: 1px solid var(--secondary-color);
+            display: flex;
+            gap: 10px;
+        }
+
+        .card-footer .btn {
+            flex-grow: 1;
+            padding: 8px 12px;
+            font-size: 0.9rem;
+        }
+        
+        .btn-edit { background-color: #3498db; color: white; }
+        .btn-delete { background-color: #c0392b; color: white; }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0; top: 0;
+            width: 100%; height: 100%;
+            background-color: rgba(0,0,0,0.6);
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .modal-content {
+            background: var(--primary-color);
+            padding: 2rem;
+            border-radius: 12px;
+            width: 90%;
+            max-width: 500px;
+            animation: slide-down 0.4s ease-out;
+        }
+        
+        @keyframes slide-down {
+            from { transform: translateY(-50px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+        
+        .modal-header h2 { margin: 0; }
+        
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 2rem;
+            color: #aaa;
+            cursor: pointer;
+            transition: color 0.2s;
+        }
+        .close-btn:hover { color: white; }
+
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+        }
+        
+        .form-group input {
+            width: 100%;
+            padding: 12px;
+            border-radius: 8px;
+            border: 2px solid var(--secondary-color);
+            background-color: var(--bg-color);
+            color: var(--font-color);
+            font-size: 1rem;
+            box-sizing: border-box;
+        }
+
+        /* Toast Notifications */
+        #toast-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 2000;
+        }
+        .toast {
+            padding: 15px 20px;
+            border-radius: 8px;
+            color: white;
+            margin-bottom: 10px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+            opacity: 0;
+            transform: translateX(100%);
+            animation: slide-in 0.5s forwards, slide-out 0.5s 4s forwards;
+        }
+
+        .toast.success { background-color: var(--success-color); }
+        .toast.error { background-color: var(--error-color); }
+        
+        @keyframes slide-in {
+            to { opacity: 1; transform: translateX(0); }
+        }
+        @keyframes slide-out {
+            from { opacity: 1; transform: translateX(0); }
+            to { opacity: 0; transform: translateX(100%); }
+        }
+
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <div class="header">
+            <h1>EMS Dashboard</h1>
+            <button id="load-employees-btn" class="btn btn-primary">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 15v4c0 1.1.9 2 2 2h14a2 2 0 0 0 2-2v-4M17 9l-5 5-5-5M12 14V3"/></svg>
+                Load Employees
+            </button>
+        </div>
+
+        <div id="employee-section">
+            <div class="toolbar">
+                <div class="search-bar">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                    <input type="text" id="search-input" placeholder="Search by name or ID...">
+                </div>
+                <button id="add-new-btn" class="btn btn-primary">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                    Add New
+                </button>
+            </div>
+            <div id="employee-grid" class="employee-grid">
+                <!-- Employee cards will be inserted here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Add/Edit Modal -->
+    <div id="employee-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modal-title">Add Employee</h2>
+                <button class="close-btn">&times;</button>
+            </div>
+            <form id="employee-form">
+                <input type="hidden" id="employee-id">
+                <div class="form-group">
+                    <label for="name">Name</label>
+                    <input type="text" id="name" required>
+                </div>
+                <div class="form-group">
+                    <label for="salary">Salary</label>
+                    <input type="number" id="salary" required>
+                </div>
+                <div class="form-group">
+                    <label for="deptid">Department ID</label>
+                    <input type="number" id="deptid" required>
+                </div>
+                <button type="submit" class="btn btn-primary" style="width: 100%;">Save</button>
+            </form>
+        </div>
+    </div>
+    
+    <!-- Toast Notification Container -->
+    <div id="toast-container"></div>
+
+    <script>
+        const API_BASE_URL = 'http://localhost:9090'; // Your backend URL
+
+        // DOM Elements
+        const loadBtn = document.getElementById('load-employees-btn');
+        const employeeSection = document.getElementById('employee-section');
+        const employeeGrid = document.getElementById('employee-grid');
+        const searchInput = document.getElementById('search-input');
+        const modal = document.getElementById('employee-modal');
+        const addNewBtn = document.getElementById('add-new-btn');
+        const closeModalBtn = document.querySelector('.close-btn');
+        const employeeForm = document.getElementById('employee-form');
+        const modalTitle = document.getElementById('modal-title');
+
+        let allEmployees = []; // Cache for storing all employees
+
+        // --- EVENT LISTENERS ---
+        loadBtn.addEventListener('click', fetchAndDisplayEmployees);
+        addNewBtn.addEventListener('click', () => openModal());
+        closeModalBtn.addEventListener('click', closeModal);
+        window.addEventListener('click', (e) => {
+            if (e.target === modal) closeModal();
+        });
+        employeeForm.addEventListener('submit', handleFormSubmit);
+        searchInput.addEventListener('input', filterEmployees);
+
+        // --- API & DISPLAY LOGIC ---
+        function fetchAndDisplayEmployees() {
+            loadBtn.textContent = 'Loading...';
+            loadBtn.disabled = true;
+
+            fetch(`${API_BASE_URL}/getallemployees`)
+                .then(response => {
+                    if (!response.ok) throw new Error('Network response was not ok');
+                    return response.json();
+                })
+                .then(data => {
+                    allEmployees = data;
+                    displayEmployees(allEmployees);
+                    employeeSection.style.display = 'block';
+                    loadBtn.style.display = 'none'; // Hide button after loading
+                })
+                .catch(error => {
+                    console.error('Error fetching employees:', error);
+                    showToast('Failed to load employees.', 'error');
+                    loadBtn.textContent = 'Load Employees';
+                    loadBtn.disabled = false;
+                });
+        }
+
+        function displayEmployees(employees) {
+            employeeGrid.innerHTML = '';
+            if (employees.length === 0) {
+                employeeGrid.innerHTML = '<p>No employees found.</p>';
+                return;
+            }
+            employees.forEach(emp => {
+                const card = document.createElement('div');
+                card.className = 'employee-card';
+                card.dataset.employeeId = emp.id;
+                card.innerHTML = `
+                    <div class="card-header">
+                        <h3>${emp.name}</h3>
+                        <span class="emp-id">ID: ${emp.id}</span>
+                    </div>
+                    <div class="card-body">
+                        <p><strong>Salary:</strong> $${emp.salary.toLocaleString()}</p>
+                        <p><strong>Department:</strong> ${emp.deptid}</p>
+                    </div>
+                    <div class="card-footer">
+                        <button class="btn btn-edit" onclick='openModal(${JSON.stringify(emp)})'>Edit</button>
+                        <button class="btn btn-delete" onclick='deleteEmployee(${emp.id})'>Delete</button>
+                    </div>
+                `;
+                employeeGrid.appendChild(card);
+            });
+        }
+
+        function filterEmployees() {
+            const query = searchInput.value.toLowerCase();
+            const filtered = allEmployees.filter(emp => 
+                emp.name.toLowerCase().includes(query) || 
+                emp.id.toString().includes(query)
+            );
+            displayEmployees(filtered);
+        }
+
+        // --- MODAL & FORM LOGIC ---
+        function openModal(employee = null) {
+            employeeForm.reset();
+            if (employee) {
+                modalTitle.textContent = 'Edit Employee';
+                document.getElementById('employee-id').value = employee.id;
+                document.getElementById('name').value = employee.name;
+                document.getElementById('salary').value = employee.salary;
+                document.getElementById('deptid').value = employee.deptid;
+            } else {
+                modalTitle.textContent = 'Add New Employee';
+                document.getElementById('employee-id').value = '';
+            }
+            modal.style.display = 'flex';
+        }
+
+        function closeModal() {
+            modal.style.display = 'none';
+        }
+
+        function handleFormSubmit(event) {
+            event.preventDefault();
+            const employeeId = document.getElementById('employee-id').value;
+            const employeeData = {
+                name: document.getElementById('name').value,
+                salary: parseInt(document.getElementById('salary').value, 10),
+                deptid: parseInt(document.getElementById('deptid').value, 10)
+            };
+
+            if (employeeId) {
+                employeeData.id = parseInt(employeeId, 10);
+            }
+            
+            saveEmployee(employeeData);
+        }
+
+        // --- CRUD OPERATIONS ---
+        function saveEmployee(employeeData) {
+            fetch(`${API_BASE_URL}/addEmployee`, { 
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(employeeData)
+            })
+            .then(response => {
+                if (!response.ok) throw new Error('Failed to save employee');
+                return response.json();
+            })
+            .then(() => {
+                showToast('Employee saved successfully!', 'success');
+                closeModal();
+                fetchAndDisplayEmployees(); // Re-fetch all data to show changes
+            })
+            .catch(error => {
+                console.error('Error saving employee:', error);
+                showToast(error.message, 'error');
+            });
+        }
+
+        function deleteEmployee(id) {
+            if (confirm('Are you sure you want to delete this employee?')) {
+                fetch(`${API_BASE_URL}/deleteEmployee?id=${id}`, { method: 'DELETE' })
+                .then(response => {
+                    if (!response.ok) throw new Error('Failed to delete employee');
+                    showToast('Employee deleted.', 'success');
+                    fetchAndDisplayEmployees(); // Re-fetch all data
+                })
+                .catch(error => {
+                    console.error('Error deleting employee:', error);
+                    showToast(error.message, 'error');
+                });
+            }
+        }
+
+        // --- UTILITY ---
+        function showToast(message, type = 'success') {
+            const toastContainer = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            toast.textContent = message;
+            toastContainer.appendChild(toast);
+            setTimeout(() => toast.remove(), 4500);
+        }
+    </script>
+</body>
+</html>
